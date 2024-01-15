@@ -5,21 +5,13 @@ interface IPlayer {
     audio: HTMLAudioElement
 }
 
-interface IButtonClickEvent extends MouseEvent {
-    currentTarget: HTMLButtonElement
-}
-
-interface IInputChangeEvent extends Event {
-    currentTarget: HTMLInputElement
-}
-
 let activeButton: HTMLElement,
     activePlayer: IPlayer,
     players: Array<IPlayer> = []
 
-const app = document.getElementById('app')! as HTMLElement
-const buttonsContainer = app.querySelector('.container.buttons')! as HTMLElement
-const volumeSwitcher = app.querySelector('.container.switcher input')! as HTMLInputElement
+const app = document.getElementById('app') as HTMLElement
+const buttonsContainer = app.querySelector('.container.buttons') as HTMLElement
+const volumeSwitcher = app.querySelector('.container.switcher input') as HTMLInputElement
 
 function getButtons(): NodeListOf<HTMLButtonElement> {
     return buttonsContainer.querySelectorAll('button')
@@ -52,28 +44,26 @@ function setAppBackground(name: string): void {
     app.classList.add(`bg-${name}`)
 }
 
-function onClick(event: IButtonClickEvent): void {
-    // const target = event.currentTarget as HTMLButtonElement
-    const target = event.currentTarget
+function onClick(event: Event): void {
+    const target = event.currentTarget as HTMLButtonElement
     const isActive = target.classList.contains('active')
-    const {name: weatherName} = target.dataset
+    const weatherName: string | undefined = target.dataset.name
+    if (!weatherName) return
 
     if (isActive) {
         deactivateButton(target)
         activePlayer.audio.pause()
     } else {
         activateButton(target)
-        if (weatherName) {
-            setAppBackground(weatherName)
-            setActivePlayer(weatherName)
-        }
-
+        setAppBackground(weatherName)
+        setActivePlayer(weatherName)
         activePlayer.audio.play()
     }
 }
 
-function onVolumeChange(event: IInputChangeEvent): void {
-    players.forEach(({audio}) => audio.volume = +event.currentTarget.value / 100)
+function onVolumeChange(event: Event): void {
+    const target = event.currentTarget as HTMLInputElement
+    players.forEach(({audio}) => audio.volume = +target.value / 100)
 }
 
 export function init(): void {
@@ -107,5 +97,3 @@ export function init(): void {
     volumeSwitcher.value = '50'
     volumeSwitcher.addEventListener('input', onVolumeChange)
 }
-
-
